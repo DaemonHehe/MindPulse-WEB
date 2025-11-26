@@ -1,11 +1,21 @@
-import { Activity, Moon, Brain, Heart } from "lucide-react"
+import { Activity as ActivityIcon, Moon, Brain, Heart } from "lucide-react"
+import type { LucideIcon } from "lucide-react"
 import Link from "next/link"
 import { ChevronRight } from "lucide-react"
 
-const activities = [
+export type ActivityItem = {
+  id: string | number
+  title: string
+  time: string
+  href?: string
+  icon?: LucideIcon
+  color?: string
+}
+
+const defaultActivities: ActivityItem[] = [
   {
     id: 1,
-    icon: Activity,
+    icon: ActivityIcon,
     title: "Stress check completed",
     time: "2 hours ago",
     color: "text-primary",
@@ -37,7 +47,9 @@ const activities = [
   },
 ]
 
-export function RecentActivity() {
+export function RecentActivity({ items }: { items?: ActivityItem[] }) {
+  const activities = items && items.length > 0 ? items : defaultActivities
+
   return (
     <div className="space-y-3">
       <div className="flex items-center justify-between">
@@ -48,22 +60,25 @@ export function RecentActivity() {
         </Link>
       </div>
       <div className="space-y-2">
-        {activities.map((activity) => (
-          <Link
-            key={activity.id}
-            href={activity.href}
-            className="flex items-center gap-3 p-3 rounded-xl bg-card/30 hover:bg-card/50 transition-colors"
-          >
-            <div className="p-2 rounded-lg bg-secondary">
-              <activity.icon className={`w-4 h-4 ${activity.color}`} />
-            </div>
-            <div className="flex-1 min-w-0">
-              <p className="text-sm font-medium text-foreground truncate">{activity.title}</p>
-              <p className="text-xs text-muted-foreground">{activity.time}</p>
-            </div>
-            <ChevronRight className="w-4 h-4 text-muted-foreground" />
-          </Link>
-        ))}
+        {activities.map((activity) => {
+          const Icon = activity.icon || ActivityIcon
+          return (
+            <Link
+              key={activity.id}
+              href={activity.href || "/activity"}
+              className="flex items-center gap-3 p-3 rounded-xl bg-card/30 hover:bg-card/50 transition-colors"
+            >
+              <div className="p-2 rounded-lg bg-secondary">
+                <Icon className={`w-4 h-4 ${activity.color || "text-primary"}`} />
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-medium text-foreground truncate">{activity.title}</p>
+                <p className="text-xs text-muted-foreground">{activity.time}</p>
+              </div>
+              <ChevronRight className="w-4 h-4 text-muted-foreground" />
+            </Link>
+          )
+        })}
       </div>
     </div>
   )

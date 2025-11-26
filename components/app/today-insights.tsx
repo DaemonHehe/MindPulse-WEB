@@ -1,10 +1,17 @@
 "use client"
 
-import { useState } from "react"
+import { useMemo, useState } from "react"
 import { Lightbulb, X } from "lucide-react"
 import { cn } from "@/lib/utils"
 
-const insights = [
+export type InsightItem = {
+  id: string | number
+  type?: "positive" | "suggestion" | "info"
+  title: string
+  description: string
+}
+
+const defaultInsights: InsightItem[] = [
   {
     id: 1,
     type: "positive",
@@ -25,9 +32,18 @@ const insights = [
   },
 ]
 
-export function TodayInsights() {
-  const [dismissed, setDismissed] = useState<number[]>([])
-  const activeInsights = insights.filter((i) => !dismissed.includes(i.id))
+interface TodayInsightsProps {
+  items?: InsightItem[]
+}
+
+export function TodayInsights({ items }: TodayInsightsProps) {
+  const [dismissed, setDismissed] = useState<string[]>([])
+  const source = items && items.length > 0 ? items : defaultInsights
+
+  const activeInsights = useMemo(
+    () => source.filter((insight) => !dismissed.includes(String(insight.id))),
+    [dismissed, source],
+  )
 
   if (activeInsights.length === 0) return null
 
@@ -61,7 +77,7 @@ export function TodayInsights() {
               <p className="text-xs text-muted-foreground mt-0.5">{insight.description}</p>
             </div>
             <button
-              onClick={() => setDismissed([...dismissed, insight.id])}
+              onClick={() => setDismissed([...dismissed, String(insight.id)])}
               className="p-1 rounded-lg hover:bg-secondary transition-colors opacity-0 group-hover:opacity-100"
             >
               <X className="w-4 h-4 text-muted-foreground" />
