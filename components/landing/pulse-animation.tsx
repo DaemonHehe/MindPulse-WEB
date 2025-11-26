@@ -1,6 +1,21 @@
 "use client"
 
+import { useMemo } from "react"
+import { createSeededRandom } from "@/lib/utils"
+
 export function PulseAnimation() {
+  const particles = useMemo(() => {
+    const random = createSeededRandom(42)
+    return Array.from({ length: 20 }).map((_, i) => ({
+      cx: random() * 1200,
+      cy: random() * 800,
+      r: random() * 3 + 1,
+      delay: random() * 2,
+      duration: 2 + random() * 2,
+      fill: i % 2 === 0 ? "#6EC9FF" : "#B488FF",
+    }))
+  }, [])
+
   return (
     <div className="absolute inset-0 overflow-hidden">
       {/* Neural wave lines */}
@@ -35,18 +50,18 @@ export function PulseAnimation() {
         ))}
 
         {/* Floating particles */}
-        {Array.from({ length: 20 }).map((_, i) => (
+        {particles.map((particle, i) => (
           <circle
             key={`particle-${i}`}
-            cx={Math.random() * 1200}
-            cy={Math.random() * 800}
-            r={Math.random() * 3 + 1}
-            fill={i % 2 === 0 ? "#6EC9FF" : "#B488FF"}
+            cx={particle.cx}
+            cy={particle.cy}
+            r={particle.r}
+            fill={particle.fill}
             opacity={0.3}
             className="animate-pulse"
             style={{
-              animationDelay: `${Math.random() * 2}s`,
-              animationDuration: `${2 + Math.random() * 2}s`,
+              animationDelay: `${particle.delay}s`,
+              animationDuration: `${particle.duration}s`,
             }}
           />
         ))}

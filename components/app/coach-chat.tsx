@@ -9,8 +9,18 @@ interface Message {
   id: string
   role: "user" | "assistant"
   content: string
-  timestamp: Date
+  timestamp: string
 }
+
+const formatTime = (date: Date, options?: Intl.DateTimeFormatOptions) =>
+  new Intl.DateTimeFormat("en-US", {
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: true,
+    ...options,
+  }).format(date)
+
+const INITIAL_MESSAGE_TIME = formatTime(new Date("2024-01-01T12:00:00Z"), { timeZone: "UTC" })
 
 const initialMessages: Message[] = [
   {
@@ -18,7 +28,7 @@ const initialMessages: Message[] = [
     role: "assistant",
     content:
       "Hi there! I'm your MindPulse AI Coach. I noticed your stress levels were slightly elevated this afternoon. Would you like to talk about what's on your mind, or shall we try a quick relaxation exercise?",
-    timestamp: new Date(Date.now() - 60000),
+    timestamp: INITIAL_MESSAGE_TIME,
   },
 ]
 
@@ -39,13 +49,16 @@ export function CoachChat() {
   }, [messages])
 
   const handleSend = async () => {
-    if (!input.trim()) return
+    const trimmedInput = input.trim()
+    if (!trimmedInput) return
+
+    const nowLabel = formatTime(new Date())
 
     const userMessage: Message = {
       id: Date.now().toString(),
       role: "user",
-      content: input,
-      timestamp: new Date(),
+      content: trimmedInput,
+      timestamp: nowLabel,
     }
 
     setMessages((prev) => [...prev, userMessage])
@@ -65,15 +78,16 @@ export function CoachChat() {
           "Your HRV analysis shows positive trends:\n\n• Current: 48ms (Good)\n• 7-day trend: ↑ 8% improvement\n• Best time: Morning readings\n• Recovery: Above average\n\nYour HRV tends to be highest after nights with 7+ hours of sleep and lower on days with afternoon stress spikes. Keep focusing on sleep consistency!",
       }
 
+      const normalizedInput = trimmedInput.toLowerCase()
       const response =
-        responses[input.toLowerCase()] ||
+        responses[normalizedInput] ||
         "I understand. Let me analyze your recent biometric data to give you more personalized insights. Your overall wellness trend is positive - your stress has decreased 15% this week and sleep quality is improving. Is there a specific area you'd like to focus on?"
 
       const assistantMessage: Message = {
         id: (Date.now() + 1).toString(),
         role: "assistant",
         content: response,
-        timestamp: new Date(),
+        timestamp: formatTime(new Date()),
       }
 
       setMessages((prev) => [...prev, assistantMessage])
@@ -114,7 +128,7 @@ export function CoachChat() {
                   message.role === "user" ? "text-primary-foreground/70" : "text-muted-foreground",
                 )}
               >
-                {message.timestamp.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
+                {message.timestamp}
               </p>
             </div>
           </div>

@@ -1,7 +1,9 @@
 "use client"
 
+import { useMemo } from "react"
 import { Card } from "@/components/ui/card"
 import { Activity, Heart, Sun, MessageSquare, AlertTriangle, Moon, TrendingUp, Shield } from "lucide-react"
+import { createSeededRandom } from "@/lib/utils"
 
 const features = [
   {
@@ -57,6 +59,15 @@ const features = [
 ]
 
 export function KeyFeatures() {
+  const graphHeights = useMemo(() => {
+    return features.map((_, featureIndex) => {
+      const random = createSeededRandom(100 + featureIndex)
+      return Array.from({ length: 12 }).map(
+        (__, barIndex) => Number((20 + Math.sin(barIndex * 0.8 + featureIndex) * 15 + random() * 10).toFixed(4)),
+      )
+    })
+  }, [])
+
   return (
     <section id="features" className="py-24 relative overflow-hidden">
       <div className="absolute inset-0 -z-10">
@@ -99,7 +110,7 @@ export function KeyFeatures() {
                     key={i}
                     className={`w-1.5 rounded-t ${feature.bgColor}`}
                     style={{
-                      height: `${20 + Math.sin(i * 0.8 + index) * 15 + Math.random() * 10}px`,
+                      height: `${graphHeights[index][i]}px`,
                     }}
                   />
                 ))}
